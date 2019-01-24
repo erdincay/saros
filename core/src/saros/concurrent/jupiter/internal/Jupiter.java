@@ -82,8 +82,10 @@ public class Jupiter implements Algorithm {
     JupiterActivity jupiterActivity = new JupiterActivity(this.vectorTime, op, source, editor);
 
     // add(op, myMsgs) to outgoing;
-    this.ackJupiterActivityList.add(
-        new OperationWrapper(op, this.vectorTime.getLocalOperationCount()));
+    if (!(op instanceof TimestampOperation)) {
+      this.ackJupiterActivityList.add(
+          new OperationWrapper(op, this.vectorTime.getLocalOperationCount()));
+    }
 
     // myMsgs = myMsgs + 1;
     this.vectorTime = this.vectorTime.incrementLocalOperationCount();
@@ -142,21 +144,16 @@ public class Jupiter implements Algorithm {
   public Operation receiveJupiterActivity(JupiterActivity jupiterActivity)
       throws TransformationException {
 
-    if (jupiterActivity.getOperation() instanceof TimestampOperation) {
-
-      // TODO Use timestamps correctly!
-      log.warn("Timestamp operations are not tested at the moment");
-
-      updateVectorTime(jupiterActivity.getTimestamp());
-      return new NoOperation();
-    }
-
     Timestamp timestamp = jupiterActivity.getTimestamp();
     if (!(timestamp instanceof JupiterVectorTime)) {
       throw new IllegalArgumentException("Jupiter expects timestamps of type JupiterVectorTime");
     }
     checkPreconditions((JupiterVectorTime) timestamp);
     discardAcknowledgedOperations((JupiterVectorTime) timestamp);
+
+    if (jupiterActivity.getOperation() instanceof TimestampOperation) {
+      return new NoOperation();
+    }
 
     Operation newOp = transform(jupiterActivity.getOperation());
     this.vectorTime = this.vectorTime.incrementRemoteOperationCount();

@@ -3,6 +3,7 @@ package saros.concurrent.management;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
+import org.picocontainer.Startable;
 import saros.activities.AbstractActivityReceiver;
 import saros.activities.ChecksumActivity;
 import saros.activities.FileActivity;
@@ -25,7 +26,7 @@ import saros.session.ISarosSession;
  * <p>When JupiterActivities are received from the server they are transformed by the
  * ConcurrentDocumentClient to TextEditActivities which can then be executed locally.
  */
-public class ConcurrentDocumentClient {
+public class ConcurrentDocumentClient implements Startable {
 
   private static Logger log = Logger.getLogger(ConcurrentDocumentClient.class);
 
@@ -187,5 +188,15 @@ public class ConcurrentDocumentClient {
       // TODO this should trigger a consistency recovery. Difficult :-(
       return false;
     }
+  }
+
+  @Override
+  public void start() {
+    jupiterClient.start();
+  }
+
+  @Override
+  public void stop() {
+    jupiterClient.stop();
   }
 }

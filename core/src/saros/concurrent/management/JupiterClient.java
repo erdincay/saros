@@ -1,6 +1,10 @@
 package saros.concurrent.management;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import org.picocontainer.Startable;
 import saros.activities.ChecksumActivity;
 import saros.activities.JupiterActivity;
 import saros.activities.SPath;
@@ -8,27 +12,30 @@ import saros.activities.TextEditActivity;
 import saros.concurrent.jupiter.Operation;
 import saros.concurrent.jupiter.TransformationException;
 import saros.concurrent.jupiter.internal.Jupiter;
+import saros.concurrent.jupiter.internal.text.TimestampOperation;
+import saros.session.AbstractActivityProducer;
 import saros.session.ISarosSession;
+import saros.util.NamedThreadFactory;
 
 /** A JupiterClient manages Jupiter client docs for a single user with several paths */
-public class JupiterClient {
+public class JupiterClient extends AbstractActivityProducer implements Startable {
 
-  protected ISarosSession sarosSession;
-
-  public JupiterClient(ISarosSession sarosSession) {
-    this.sarosSession = sarosSession;
-  }
-
+  private final ISarosSession sarosSession;
   /**
    * Jupiter instances for each local editor.
    *
    * @host and @client
    */
-  protected final HashMap<SPath, Jupiter> clientDocs = new HashMap<SPath, Jupiter>();
+  private final Map<SPath, Jupiter> clientDocs = new HashMap<>();
+
+  private ScheduledThreadPoolExecutor jupiterHeartbeat;
+
+  public JupiterClient(ISarosSession sarosSession) {
+    this.sarosSession = sarosSession;
+  }
 
   /** @host and @client */
   protected synchronized Jupiter get(SPath path) {
-
     Jupiter clientDoc = this.clientDocs.get(path);
     if (clientDoc == null) {
       clientDoc = new Jupiter(true);
@@ -70,5 +77,27 @@ public class JupiterClient {
   public synchronized ChecksumActivity withTimestamp(ChecksumActivity checksumActivity) {
 
     return get(checksumActivity.getPath()).withTimestamp(checksumActivity);
+  }
+
+  @Override
+  public void start() {
+    jupiterHeartbeat =
+        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("dpp-jupiter-heartbeat"));
+    jupiterHeartbeat.scheduleWithFixedDelay(this::dispatchHeartbeats, 1, 1, TimeUnit.MINUTES);
+  }
+
+  private synchronized void dispatchHeartbeats() {
+    clientDocs.forEach(
+        (path, jupiter) -> {
+          JupiterActivity heartbeat =
+              jupiter.generateJupiterActivity(
+                  new TimestampOperation(), sarosSession.getLocalUser(), path);
+          fireActivity(heartbeat);
+        });
+  }
+
+  @Override
+  public void stop() {
+    jupiterHeartbeat.shutdown();
   }
 }
