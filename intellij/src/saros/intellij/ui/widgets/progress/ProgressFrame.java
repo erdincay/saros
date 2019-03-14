@@ -1,6 +1,5 @@
 package saros.intellij.ui.widgets.progress;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.WindowManager;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
@@ -11,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import org.picocontainer.annotations.Inject;
 import saros.SarosPluginContext;
+import saros.intellij.ui.util.UIProjectUtils;
 import saros.monitoring.IProgressMonitor;
 
 /** Creates independent progress monitor window */
@@ -22,7 +22,7 @@ public class ProgressFrame implements IProgressMonitor {
 
   private MonitorProgressBar monitorProgressBar;
 
-  @Inject private Project project;
+  @Inject private UIProjectUtils projectUtils;
 
   private JFrame frmMain;
   private JButton btnCancel;
@@ -42,7 +42,9 @@ public class ProgressFrame implements IProgressMonitor {
 
     frmMain = new JFrame(title);
     frmMain.setSize(300, 160);
-    frmMain.setLocationRelativeTo(WindowManager.getInstance().getFrame(project));
+
+    projectUtils.runWithProject(
+        project -> frmMain.setLocationRelativeTo(WindowManager.getInstance().getFrame(project)));
 
     Container pane = frmMain.getContentPane();
     pane.setLayout(null);
