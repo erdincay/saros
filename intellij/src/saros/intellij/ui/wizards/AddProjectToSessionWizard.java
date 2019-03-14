@@ -10,6 +10,7 @@ import com.intellij.openapi.progress.PerformInBackgroundOption;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModifiableRootModel;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.ThrowableComputable;
@@ -29,6 +30,7 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.picocontainer.annotations.Inject;
+import saros.SarosPluginContext;
 import saros.filesystem.IChecksumCache;
 import saros.filesystem.IProject;
 import saros.filesystem.IWorkspace;
@@ -386,13 +388,17 @@ public class AddProjectToSessionWizard extends Wizard {
    *
    * @param negotiation The IPN this wizard handles
    */
-  public AddProjectToSessionWizard(Window parent, AbstractIncomingProjectNegotiation negotiation) {
+  public AddProjectToSessionWizard(
+      Project project, Window parent, AbstractIncomingProjectNegotiation negotiation) {
 
     super(
+        project,
         parent,
         Messages.AddProjectToSessionWizard_title,
         new HeaderPanel(
             Messages.EnterProjectNamePage_title2, Messages.EnterProjectNamePage_description));
+
+    SarosPluginContext.initComponent(this);
 
     this.negotiation = negotiation;
     this.peer = negotiation.getPeer();

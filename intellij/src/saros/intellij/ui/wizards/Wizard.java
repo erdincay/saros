@@ -19,8 +19,6 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import org.jetbrains.annotations.NotNull;
-import org.picocontainer.annotations.Inject;
-import saros.SarosPluginContext;
 import saros.intellij.ui.wizards.pages.AbstractWizardPage;
 import saros.intellij.ui.wizards.pages.HeaderPanel;
 import saros.intellij.ui.wizards.pages.NavigationPanel;
@@ -71,17 +69,17 @@ public abstract class Wizard extends JDialog {
 
   private final NavigationPanel navigationPanel;
 
-  @Inject protected Project project;
-
+  protected Project project;
   /**
    * Constructor creates wizard structure.
    *
    * @param title window title
    * @param headerPanel
    */
-  public Wizard(Window parent, String title, HeaderPanel headerPanel) {
+  public Wizard(Project project, Window parent, String title, HeaderPanel headerPanel) {
     super(parent, title);
-    SarosPluginContext.initComponent(this);
+
+    this.project = project;
 
     this.headerPanel = headerPanel;
 
