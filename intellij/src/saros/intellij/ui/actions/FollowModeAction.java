@@ -1,6 +1,7 @@
 package saros.intellij.ui.actions;
 
 import org.picocontainer.annotations.Inject;
+import saros.SarosPluginContext;
 import saros.editor.FollowModeManager;
 import saros.session.ISarosSession;
 import saros.session.ISarosSessionManager;
@@ -36,6 +37,8 @@ public class FollowModeAction extends AbstractSarosAction {
   private volatile FollowModeManager followModeManager;
 
   public FollowModeAction() {
+    SarosPluginContext.initComponent(this);
+
     sessionManager.addSessionLifecycleListener(sessionLifecycleListener);
   }
 
