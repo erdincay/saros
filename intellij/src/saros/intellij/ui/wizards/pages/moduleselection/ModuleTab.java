@@ -10,9 +10,11 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.JBInsets;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Comparator;
 import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -70,11 +72,7 @@ class ModuleTab {
      *  - add listener to update other fields + set new default selection for chosen project
      */
 
-    /*
-     * TODO set up radio-buttons
-     *  - make radio-buttons exclusive (selecting one deselects other)
-     *  - add logic to enable/disable fields according to chosen radio-button
-     */
+    setUpRadioButtons();
 
     /*
      * TODO set up new module fields logic
@@ -105,6 +103,66 @@ class ModuleTab {
     }
 
     projectComboBox.clearSelection();
+  }
+
+  /**
+   * Sets up the radio buttons used to choose whether to create a new module or use and existing
+   * module for the project negotiation.
+   */
+  private void setUpRadioButtons() {
+    final String CREATE_NEW_MODULE_ACTION_COMMAND = "create new";
+    final String USE_EXISTING_MODULE_ACTION_COMMAND = "use existing";
+
+    createNewModuleRadioButton.setActionCommand(CREATE_NEW_MODULE_ACTION_COMMAND);
+    useExistingModuleRadioButton.setActionCommand(USE_EXISTING_MODULE_ACTION_COMMAND);
+
+    ButtonGroup buttonGroup = new ButtonGroup();
+    buttonGroup.add(createNewModuleRadioButton);
+    buttonGroup.add(useExistingModuleRadioButton);
+
+    ActionListener radioButtonActionListener =
+        actionEvent -> {
+          switch (actionEvent.getActionCommand()) {
+            case CREATE_NEW_MODULE_ACTION_COMMAND:
+              setCreateNewModuleFieldsEnabled(true);
+              setUseExistingModuleFieldsEnabled(false);
+              break;
+
+            case USE_EXISTING_MODULE_ACTION_COMMAND:
+              setCreateNewModuleFieldsEnabled(false);
+              setUseExistingModuleFieldsEnabled(true);
+              break;
+
+            default:
+              throw new IllegalStateException("Encountered unknown radio button selection.");
+          }
+
+          updateInputValidity();
+        };
+
+    createNewModuleRadioButton.addActionListener(radioButtonActionListener);
+    useExistingModuleRadioButton.addActionListener(radioButtonActionListener);
+  }
+
+  /**
+   * Enables or disables all fields belonging to the option to create a new module as part of the
+   * project negotiation.
+   *
+   * @param enabled whether ot not the fields should be set to enabled
+   */
+  private void setCreateNewModuleFieldsEnabled(boolean enabled) {
+    newModuleNameTextField.setEnabled(enabled);
+    newModuleBasePathTextField.setEnabled(enabled);
+  }
+
+  /**
+   * Enables or disables all fields belonging to the option to use an existing module as part of the
+   * project negotiation.
+   *
+   * @param enabled whether ot not the fields should be set to enabled
+   */
+  private void setUseExistingModuleFieldsEnabled(boolean enabled) {
+    existingModuleComboBox.setEnabled(enabled);
   }
 
   /**

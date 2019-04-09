@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
  * @param <T> the type of object contained in the combo-box
  */
 class ObjectComboBox<T> {
+
   private final Map<String, T> objectMapping;
   private final JComboBox<String> comboBox;
 
@@ -109,5 +110,14 @@ class ObjectComboBox<T> {
     objectMapping.clear();
 
     comboBox.removeAllItems();
+  }
+
+  /**
+   * Adjusts the enabled-state of the held combo-box according to the passed value.
+   *
+   * @param enabled the new enabled-state of the held combo-box
+   */
+  void setEnabled(boolean enabled) {
+    comboBox.setEnabled(enabled);
   }
 }
