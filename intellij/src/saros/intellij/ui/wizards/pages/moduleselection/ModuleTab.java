@@ -2,6 +2,7 @@ package saros.intellij.ui.wizards.pages.moduleselection;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBRadioButton;
@@ -9,6 +10,8 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.JBInsets;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.Arrays;
+import java.util.Comparator;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -60,11 +63,7 @@ class ModuleTab {
 
     initPanel();
 
-    /*
-     * TODO set up default selection
-     *  - fill project combo box
-     *  - check if project module combination is found; select it if present
-     */
+    fillProjectComboBox();
 
     /*
      * TODO set up project combo box logic
@@ -88,6 +87,24 @@ class ModuleTab {
      *  - call updateValidity whenever a field changes to inform the wizard page of potential state
      *    changes
      */
+  }
+
+  /**
+   * Fills the project combo box with all open projects of the current Intellij application and
+   * clears the default selection. The projects are sorted alphabetically.
+   *
+   * @see ProjectManager#getOpenProjects()
+   */
+  private void fillProjectComboBox() {
+    Project[] projects = ProjectManager.getInstance().getOpenProjects();
+
+    Arrays.sort(projects, Comparator.comparing(Project::getName));
+
+    for (Project project : projects) {
+      projectComboBox.addEntry(project.getName(), project);
+    }
+
+    projectComboBox.clearSelection();
   }
 
   /**
