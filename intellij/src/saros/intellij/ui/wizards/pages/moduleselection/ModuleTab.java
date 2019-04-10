@@ -371,12 +371,35 @@ class ModuleTab {
    * Returns the current input of the module tab.
    *
    * @return the current input of the module tab
+   * @throws IllegalStateException if neither of the two radio buttons is selected or if there is no
+   *     project selected
    * @see ModuleSelectionResult
    */
   @NotNull
   ModuleSelectionResult getModuleSelectionResult() {
-    // TODO create moduleSelectionResult from current state
-    return null;
+    LocalRepresentationOption chosenLocalRepresentationOption;
+
+    if (createNewModuleRadioButton.isSelected()) {
+      chosenLocalRepresentationOption = LocalRepresentationOption.CREATE_NEW_MODULE;
+    } else if (useExistingModuleRadioButton.isSelected()) {
+      chosenLocalRepresentationOption = LocalRepresentationOption.USE_EXISTING_MODULE;
+    } else {
+      throw new IllegalStateException(
+          "Encountered a state where neither of the two radio buttons was selected.");
+    }
+
+    Project project = projectComboBox.getSelectedEntry();
+
+    if (project == null) {
+      throw new IllegalStateException("Encountered a state where no project was selected.");
+    }
+
+    String newModuleName = newModuleNameTextField.getText();
+    Path newModuleBasePath = Paths.get(newModuleBasePathTextField.getText());
+    Module existingModule = existingModuleComboBox.getSelectedEntry();
+
+    return new ModuleSelectionResult(
+        chosenLocalRepresentationOption, project, newModuleName, newModuleBasePath, existingModule);
   }
 
   /**
