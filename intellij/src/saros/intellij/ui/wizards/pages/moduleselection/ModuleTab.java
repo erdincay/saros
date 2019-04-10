@@ -246,10 +246,14 @@ class ModuleTab {
     existingModuleComboBox.removeAll();
 
     for (Module module : modules) {
+      if (module.getName().equals(project.getName())) continue;
+
       existingModuleComboBox.addEntry(module.getName(), module);
     }
 
     for (Module module : modules) {
+      if (module.getName().equals(project.getName())) continue;
+
       if (module.getName().equals(moduleName)) {
         useExistingModuleRadioButton.doClick();
 
